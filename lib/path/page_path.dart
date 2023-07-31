@@ -1,11 +1,12 @@
 class PagePath {
   static const index = "/";
   static const authorization = "/authorization";
-  static const main = "/main";
+  static const home = "/home";
   static const search = "/search";
-  static const igtv = "/igtv";
+  static const add = "/add";
   static const likes = "/likes";
   static const profile = "/profile";
+  static const igtv = "/igtv";
   static const searchPicks = "/searchPicks";
   static const igbtShow = "/igbtShow";
   static const myLive = "/myLive";

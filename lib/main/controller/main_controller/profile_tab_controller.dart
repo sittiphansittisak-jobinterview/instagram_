@@ -45,8 +45,8 @@ class ProfileController {
 
   Future<bool> getUserProfile() async {
     if (isUserProfileLoading) return false;
-    await Future.delayed(const Duration(seconds: 1));
     isUserProfileLoading = true;
+    await Future.delayed(const Duration(seconds: 1));
     final random = Random();
     final profileObject = ProfileObject(
       userObject: UserObject(id: 'myId', displayName: 'Your New Name', displayImageUrl: ImagePath.userImageUrl),
@@ -72,8 +72,8 @@ class ProfileController {
 
   Future<bool> getImageList() async {
     if (isImageListLoading) return false;
-    await Future.delayed(const Duration(seconds: 1));
     isImageListLoading = true;
+    await Future.delayed(const Duration(seconds: 1));
     final imageList = List<String>.generate(10, (index) => randomImageUrl(isLarge: true, isRequiredBg: true));
     imageListRx.value = [...imageListRx.value, ...imageList];
     isImageListLoading = false;
@@ -82,8 +82,8 @@ class ProfileController {
 
   Future<bool> getImageTagList() async {
     if (isImageTagListLoading) return false;
-    await Future.delayed(const Duration(seconds: 1));
     isImageTagListLoading = true;
+    await Future.delayed(const Duration(seconds: 1));
     final imageList = List<String>.generate(10, (index) => randomImageUrl(isLarge: true, isRequiredBg: true));
     imageTagListRx.value = [...imageTagListRx.value, ...imageList];
     isImageTagListLoading = false;

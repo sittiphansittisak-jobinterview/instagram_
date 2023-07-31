@@ -20,7 +20,7 @@ class BottomNavBarWidget extends StatelessWidget {
 
     final homeButtonWidget = IconButtonWidget(
       onPressed: () {
-        Navigator.pushNamed(context, PagePath.main);
+        Navigator.pushNamed(context, PagePath.home);
       },
       icon: Icon(isHome ? Icons.home_filled : Icons.home_outlined, size: iconSize, color: iconColor),
     );

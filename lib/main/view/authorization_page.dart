@@ -64,7 +64,7 @@ class _AuthorizationPageState extends State<AuthorizationPage> {
   );
   late final _logInButtonWidget = ElevatedButton(
     style: ElevatedButton.styleFrom(backgroundColor: ColorStyle.link, minimumSize: const Size(double.infinity, 44), fixedSize: const Size(double.infinity, 44), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5))),
-    onPressed: () => Navigator.pushNamedAndRemoveUntil(context, PagePath.main, (route) => false),
+    onPressed: () => Navigator.pushNamedAndRemoveUntil(context, PagePath.home, (route) => false),
     child: const Text('Log in', style: TextStyle(color: ColorStyle.light, fontSize: FontSizeStyle.basic, fontWeight: FontWeight.bold)),
   );
   late final _logInWithFacebookButtonWidget = _elevatedButtonWithNoneHover(

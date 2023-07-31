@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:instagram/main/view/_share/image_story_widget.dart';
 import 'package:instagram/object/ig_story_shortcut_object.dart';
-import 'package:instagram/widget/image_network_widget.dart';
 import 'package:instagram/widget_style/color_style.dart';
 import 'package:instagram/widget_style/font_size_style.dart';
 
@@ -12,18 +12,7 @@ class IgStoryShortcutWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final profileImageWidget = Container(
-      margin: const EdgeInsets.only(bottom: 5.0),
-      padding: const EdgeInsets.all(1.5),
-      decoration: BoxDecoration(shape: BoxShape.circle, gradient: object.isLive == true || object.isSeen != true ? const LinearGradient(colors: [Color(0xFFFBAA47), Color(0xFFD91A46), Color(0xFFA60F93)]) : const LinearGradient(colors: [Color(0xFFC7C7CC), Color(0xFFC7C7CC)])),
-      child: Container(
-        padding: const EdgeInsets.all(1.5),
-        decoration: const BoxDecoration(shape: BoxShape.circle, color: ColorStyle.light),
-        child: ClipOval(
-          child: SizedBox.fromSize(size: const Size.fromRadius(28), child: ImageNetworkWidget(imageUrl: object.userObject?.displayImageUrl)),
-        ),
-      ),
-    );
+    final profileImageWidget = ProfileImageStoryWidget(radius: 28, object: object);
     final liveWidget = Container(
       alignment: Alignment.center,
       width: 26,

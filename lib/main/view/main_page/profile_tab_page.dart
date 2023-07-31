@@ -23,10 +23,13 @@ class _ProfileTabPageState extends State<ProfileTabPage> with AutomaticKeepAlive
   //controller
   final _controller = ProfileController();
   final _igStoryShortcutScrollController = ScrollController();
-  final _imageScrollController = ScrollController();
-  final _imageTagScrollController = ScrollController();
+  final _scrollController = ScrollController();
   late final TabController _imageTabBarController;
   final _currentImageTabIndex = Rx(0);
+  final _imageGridHeight = Rx(0.0);
+  final _imageTagGridHeight = Rx(0.0);
+  double _lastScrollPositionOfImageGrid = 0;
+  double _lastScrollPositionOfImageTagGrid = 0;
 
   //widget helper
   final _tabFocusColor = ColorStyle.dark;
@@ -125,21 +128,31 @@ class _ProfileTabPageState extends State<ProfileTabPage> with AutomaticKeepAlive
       if (snapshot.data != true) return Center(child: _someThingWrongWidget);
       _onImageScrollNotAvailable();
       return Obx(
-        () => GridView.builder(
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(), // Disable scrolling inside the GridView
-          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 3, crossAxisSpacing: 1.0, mainAxisSpacing: 1.0, childAspectRatio: 1.0),
-          itemCount: _controller.imageListRx.value.length,
-          itemBuilder: (BuildContext context, int index) {
-            return InkWell(
-              onTap: () => _controller.onTapImage(index),
-              child: ImageNetworkWidget(
-                imageUrl: _controller.imageListRx.value[index],
-                isCached: true,
-              ),
-            );
-          },
-        ),
+        () {
+          const itemPerRow = 3;
+          const itemRatio = 1.0; //width / height
+          const gridBorder = 1.0;
+          final gridWidth = (MediaQuery.of(context).size.width > 375 ? 375 : MediaQuery.of(context).size.width) / itemPerRow;
+          final rowCount = (_controller.imageListRx.value.length / itemPerRow).ceil();
+          final gridHeight = (rowCount * gridWidth / itemRatio) + (gridBorder * (rowCount - 1));
+          Future.delayed(Duration.zero, () => _imageGridHeight.value = gridHeight < 0 ? 0 : gridHeight);
+          return GridView.builder(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            // Disable scrolling inside the GridView
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: itemPerRow, childAspectRatio: itemRatio, crossAxisSpacing: gridBorder, mainAxisSpacing: gridBorder),
+            itemCount: _controller.imageListRx.value.length,
+            itemBuilder: (BuildContext context, int index) {
+              return InkWell(
+                onTap: () => _controller.onTapImage(index),
+                child: ImageNetworkWidget(
+                  imageUrl: _controller.imageListRx.value[index],
+                  isCached: true,
+                ),
+              );
+            },
+          );
+        },
       );
     },
   );
@@ -155,21 +168,31 @@ class _ProfileTabPageState extends State<ProfileTabPage> with AutomaticKeepAlive
       if (snapshot.data != true) return Center(child: _someThingWrongWidget);
       _onImageTagScrollNotAvailable();
       return Obx(
-        () => GridView.builder(
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(), // Disable scrolling inside the GridView
-          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 3, crossAxisSpacing: 1.0, mainAxisSpacing: 1.0, childAspectRatio: 1.0),
-          itemCount: _controller.imageTagListRx.value.length,
-          itemBuilder: (BuildContext context, int index) {
-            return InkWell(
-              onTap: () => _controller.onTapImage(index),
-              child: ImageNetworkWidget(
-                imageUrl: _controller.imageTagListRx.value[index],
-                isCached: true,
-              ),
-            );
-          },
-        ),
+        () {
+          const itemPerRow = 3;
+          const itemRatio = 1.0; //width / height
+          const gridBorder = 1.0;
+          final gridWidth = (MediaQuery.of(context).size.width > 375 ? 375 : MediaQuery.of(context).size.width) / itemPerRow;
+          final rowCount = (_controller.imageTagListRx.value.length / itemPerRow).ceil();
+          final gridHeight = (rowCount * gridWidth / itemRatio) + (gridBorder * (rowCount - 1));
+          Future.delayed(Duration.zero, () => _imageTagGridHeight.value = gridHeight < 0 ? 0 : gridHeight);
+          return GridView.builder(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            // Disable scrolling inside the GridView
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: itemPerRow, childAspectRatio: itemRatio, crossAxisSpacing: gridBorder, mainAxisSpacing: gridBorder),
+            itemCount: _controller.imageTagListRx.value.length,
+            itemBuilder: (BuildContext context, int index) {
+              return InkWell(
+                onTap: () => _controller.onTapImage(index),
+                child: ImageNetworkWidget(
+                  imageUrl: _controller.imageTagListRx.value[index],
+                  isCached: true,
+                ),
+              );
+            },
+          );
+        },
       );
     },
   );
@@ -179,18 +202,32 @@ class _ProfileTabPageState extends State<ProfileTabPage> with AutomaticKeepAlive
     if (_igStoryShortcutScrollController.position.pixels == _igStoryShortcutScrollController.position.maxScrollExtent) _controller.getIgStoryShortcutList();
   }
 
-  void _onImageScrollController() {
-    if (_imageScrollController.position.pixels == _imageScrollController.position.maxScrollExtent) _controller.getImageList();
+  void _onScrollController({bool isTabChange = false}) {
+    if (_scrollController.position.pixels == _scrollController.position.maxScrollExtent) {
+      _currentImageTabIndex.value == 0 ? _controller.getImageList() : _controller.getImageTagList();
+    } else if (isTabChange) {
+      // fix a bug (when change tab to tab that has lower scroll position than old tap, the loading will show but not load)
+      if (_currentImageTabIndex.value == 0 && _lastScrollPositionOfImageGrid < _lastScrollPositionOfImageTagGrid) {
+        _controller.getImageList();
+      } else if (_currentImageTabIndex.value == 1 && _lastScrollPositionOfImageTagGrid < _lastScrollPositionOfImageGrid) {
+        _controller.getImageTagList();
+      }
+    }
+    _currentImageTabIndex.value == 0 ? _lastScrollPositionOfImageGrid = _scrollController.position.pixels : _lastScrollPositionOfImageTagGrid = _scrollController.position.pixels;
   }
 
-  void _onImageTagScrollController() {
-    if (_imageTagScrollController.position.pixels == _imageTagScrollController.position.maxScrollExtent) _controller.getImageTagList();
+  void _onTabChange() {
+    final index = _imageTabBarController.index;
+    if (index == _currentImageTabIndex.value) return;
+    _currentImageTabIndex.value = index;
+    _scrollController.animateTo(index == 0 ? _lastScrollPositionOfImageGrid : _lastScrollPositionOfImageTagGrid, duration: const Duration(milliseconds: 100), curve: Curves.easeIn);
+    _onScrollController(isTabChange: true);
   }
 
   //Using for image not enough to fill screen
   Future _onImageScrollNotAvailable() async {
     await Future.delayed(Duration.zero);
-    if (_imageScrollController.position.maxScrollExtent != 0) return;
+    if (_scrollController.position.maxScrollExtent != 0) return;
     await _controller.getImageList();
     _onImageScrollNotAvailable();
   }
@@ -198,7 +235,7 @@ class _ProfileTabPageState extends State<ProfileTabPage> with AutomaticKeepAlive
 //Using for image not enough to fill screen
   Future _onImageTagScrollNotAvailable() async {
     await Future.delayed(Duration.zero);
-    if (_imageTagScrollController.position.maxScrollExtent != 0) return;
+    if (_scrollController.position.maxScrollExtent != 0) return;
     await _controller.getImageTagList();
     _onImageTagScrollNotAvailable();
   }
@@ -207,20 +244,15 @@ class _ProfileTabPageState extends State<ProfileTabPage> with AutomaticKeepAlive
   void initState() {
     super.initState();
     _igStoryShortcutScrollController.addListener(_onIgStoryShortcutScroll);
-    _imageScrollController.addListener(_onImageScrollController);
-    _imageTagScrollController.addListener(_onImageTagScrollController);
-    _imageTabBarController = TabController(length: _imageTabBarList.length, vsync: this)
-      ..addListener(() {
-        _currentImageTabIndex.value = _imageTabBarController.index;
-      });
+    _scrollController.addListener(_onScrollController);
+    _imageTabBarController = TabController(length: _imageTabBarList.length, vsync: this)..addListener(_onTabChange);
     _controller.getUserProfile();
   }
 
   @override
   void dispose() {
     _igStoryShortcutScrollController.dispose();
-    _imageScrollController.dispose();
-    _imageTagScrollController.dispose();
+    _scrollController.dispose();
     _imageTabBarController.dispose();
     super.dispose();
   }
@@ -249,60 +281,44 @@ class _ProfileTabPageState extends State<ProfileTabPage> with AutomaticKeepAlive
             ),
           ),
           Expanded(
-            child: SingleChildScrollView(
-              child: Column(
-                children: [
-                  Row(
-                    children: [
-                      Padding(padding: const EdgeInsets.symmetric(horizontal: 11), child: _imageProfileStoryWidget),
-                      Expanded(child: _statisticsWidget),
-                    ],
-                  ),
-                  const SizedBox(height: 15),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+            child: ScrollConfiguration(
+              behavior: ScrollConfiguration.of(context).copyWith(scrollbars: false),
+              child: SingleChildScrollView(
+                controller: _scrollController,
+                child: Column(
+                  children: [
+                    Row(
                       children: [
-                        _nameWidget,
-                        _bioWidget,
-                        const SizedBox(height: 7.5),
-                        SizedBox(width: double.infinity, child: _editProfileButton),
+                        Padding(padding: const EdgeInsets.symmetric(horizontal: 11), child: _imageProfileStoryWidget),
+                        Expanded(child: _statisticsWidget),
                       ],
                     ),
-                  ),
-                  Container(alignment: Alignment.centerLeft, width: double.infinity, height: 115, decoration: BoxDecoration(color: ColorStyle.mute, border: Border(bottom: BorderSide(color: ColorStyle.dark.withOpacity(0.2), width: 1))), child: _igStoryBarWidget),
-                  // _imageListWidget,
-                  DefaultTabController(
-                    length: _imageTabBarList.length,
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        _imageTabBarWidget,
-                        SizedBox(
-                          height: 812 > MediaQuery.of(context).size.height ? MediaQuery.of(context).size.height : 812, //waiting for upgrade
-                          child: TabBarView(
-                            controller: _imageTabBarController,
-                            children: [
-                              SingleChildScrollView(
-                                  controller: _imageScrollController,
-                                  child: Column(children: [
-                                    _imageListWidget,
-                                    Container(alignment: Alignment.center, margin: SpaceStyle.allBasic, child: _loadingWidget),
-                                  ])),
-                              SingleChildScrollView(
-                                  controller: _imageTagScrollController,
-                                  child: Column(children: [
-                                    _imageTagListWidget,
-                                    Container(alignment: Alignment.center, margin: SpaceStyle.allBasic, child: _loadingWidget),
-                                  ])),
-                            ],
-                          ),
-                        ),
-                      ],
+                    const SizedBox(height: 15),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          _nameWidget,
+                          _bioWidget,
+                          const SizedBox(height: 7.5),
+                          SizedBox(width: double.infinity, child: _editProfileButton),
+                        ],
+                      ),
                     ),
-                  ),
-                ],
+                    Container(alignment: Alignment.centerLeft, width: double.infinity, height: 115, decoration: BoxDecoration(color: ColorStyle.mute, border: Border(bottom: BorderSide(color: ColorStyle.dark.withOpacity(0.2), width: 1))), child: _igStoryBarWidget),
+                    _imageTabBarWidget,
+                    //waiting for upgrade
+                    Obx(() => SizedBox(
+                          height: _currentImageTabIndex.value == 0 ? _imageGridHeight.value : _imageTagGridHeight.value,
+                          child: TabBarView(controller: _imageTabBarController, children: [
+                            _imageListWidget,
+                            _imageTagListWidget,
+                          ]),
+                        )),
+                    Container(alignment: Alignment.center, margin: SpaceStyle.allBasic, child: _loadingWidget),
+                  ],
+                ),
               ),
             ),
           ),

@@ -38,47 +38,49 @@ class _ScreenTemplateWidgetState extends State<ScreenTemplateWidget> {
 
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      child: Center(
-        child: Container(
-          margin: const EdgeInsets.all(10),
-          width: 375,
-          height: 812,
-          decoration: BoxDecoration(color: Colors.white, border: Border.all(color: Colors.black)),
-          child: Column(
-            children: [
-              Container(
-                padding: const EdgeInsets.only(left: 33, right: 15),
-                height: mobileBarHeight,
-                color: widget.color,
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    timeWidget,
-                    Row(children: [signalWidget, wifiWidget, batteryWidget]),
-                  ],
+    return Scaffold(
+      body: SafeArea(
+        child: SingleChildScrollView(
+          child: Container(
+            alignment: Alignment.topLeft,
+            width: 375,
+            height: 812,
+            decoration: BoxDecoration(color: Colors.white, border: Border.all(color: Colors.black)),
+            child: Column(
+              children: [
+                Container(
+                  padding: const EdgeInsets.only(left: 33, right: 15),
+                  height: mobileBarHeight,
+                  color: widget.color,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      timeWidget,
+                      Row(children: [signalWidget, wifiWidget, batteryWidget]),
+                    ],
+                  ),
                 ),
-              ),
-              Expanded(
-                child: Stack(
-                  alignment: Alignment.bottomCenter,
-                  children: [
-                    widget.child,
-                    Container(
-                      color: widget.color,
-                      width: double.infinity,
-                      height: 34,
-                      child: Column(
-                        children: [
-                          const SizedBox(height: 20),
-                          _lintBottomWidget,
-                        ],
+                Expanded(
+                  child: Stack(
+                    alignment: Alignment.bottomCenter,
+                    children: [
+                      widget.child,
+                      Container(
+                        color: widget.color,
+                        width: double.infinity,
+                        height: 34,
+                        child: Column(
+                          children: [
+                            const SizedBox(height: 20),
+                            _lintBottomWidget,
+                          ],
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),

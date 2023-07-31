@@ -3,10 +3,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:get/get.dart';
 import 'package:instagram/main/view/authorization_page.dart';
 import 'package:instagram/main/view/initial_page.dart';
-import 'package:instagram/main/view/likes_page.dart';
 import 'package:instagram/main/view/main_page.dart';
-import 'package:instagram/main/view/profile_page.dart';
-import 'package:instagram/main/view/search_page.dart';
 import 'package:instagram/path/image_path.dart';
 import 'package:instagram/path/page_path.dart';
 import 'package:instagram/setting/scroll_setting.dart';
@@ -35,14 +32,16 @@ class _MyAppState extends State<MyApp> {
             switch (page) {
               case PagePath.authorization:
                 return const AuthorizationPage();
-              case PagePath.main:
-                return const MainPage();
+              case PagePath.home:
+                return const MainPage(path: PagePath.home);
               case PagePath.search:
-                return const SearchPage();
+                return const MainPage(path: PagePath.search);
+              case PagePath.add:
+                return const MainPage(path: PagePath.add);
               case PagePath.likes:
-                return const LikesPage();
+                return const MainPage(path: PagePath.likes);
               case PagePath.profile:
-                return const ProfilePage();
+                return const MainPage(path: PagePath.profile);
               default:
                 return const AuthorizationPage();
             }
@@ -77,8 +76,9 @@ class _MyAppState extends State<MyApp> {
       getPages: [
         _pageBuilder(PagePath.index),
         _pageBuilder(PagePath.authorization),
-        _pageBuilder(PagePath.main),
+        _pageBuilder(PagePath.home),
         _pageBuilder(PagePath.search),
+        _pageBuilder(PagePath.add),
         _pageBuilder(PagePath.likes),
         _pageBuilder(PagePath.profile),
       ],
